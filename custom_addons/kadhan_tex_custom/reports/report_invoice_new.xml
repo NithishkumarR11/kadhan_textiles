@@ -27,8 +27,8 @@
             <t t-set="has_igst" t-value="any(r['igst'] for r in hsn_rows)"/>
             <t t-set="total_qty" t-value="sum(lines.mapped('quantity'))"/>
             <t t-set="total_tax" t-value="sum(lines.mapped('price_total')) - sum(lines.mapped('price_subtotal'))"/>
-            <t t-set="bank" t-value="o.partner_bank_id"/>
-            <t t-set="qr_code_url" t-value="o.amount_residual and o._generate_qr_code(silent_errors=True)"/>
+            <t t-set="bank" t-value="o._kadhan_bank_details()"/>
+            <t t-set="qr_code_url" t-value="o._kadhan_payment_qr_src()"/>
 
             <div class="page kinv">
                 <style type="text/css">
@@ -36,7 +36,7 @@
                     .kinv * { font-family: "Times New Roman", "Liberation Serif", Times, serif !important; }
                     .kinv h2 { text-align: center; font-size: 17px; font-weight: 700; margin: 0 0 6px 0; }
                     .kinv table { width: 100%; border-collapse: collapse; }
-                    .kinv td, .kinv th { border: 1px solid #555; padding: 4px 6px; vertical-align: top; }
+                    .kinv td, .kinv th { border: 1px solid #808080; padding: 4px 6px; vertical-align: top; }
                     .kinv .nb td { border: none; padding: 0; }
                     .kinv .b { font-weight: 700; }
                     .kinv .r { text-align: right; white-space: nowrap; }
@@ -44,11 +44,16 @@
                     .kinv .company-name { font-size: 19px; font-weight: 700; margin-bottom: 4px; }
                     .kinv .small div { margin-bottom: 3px; }
                     .kinv .items th { font-weight: 700; }
-                    .kinv .items td { border-top: none; border-bottom: none; }
-                    .kinv .items tr.total td { border-top: 1px solid #555; border-bottom: 1px solid #555; font-weight: 700; }
+                    .kinv .items td { border-top: none; border-bottom: 1px solid #808080; }
+                    .kinv .items tr.filler td { border-bottom: none; }
+                    .kinv .items tr.total td { border-top: 1px solid #808080; font-weight: 700; }
                     .kinv .muted { font-size: 12px; }
-                    .kinv .inner td { border: none; padding: 3px 0; }
-                    .kinv .inner tr.sep td { border-top: 1px solid #555; }
+                    .kinv .inner td { border: none; padding: 3px 6px; }
+                    .kinv .inner tr.line td { border-bottom: 1px solid #808080; }
+                    .kinv .bank-lines div { margin-bottom: 8px; }
+                    .kinv .upi { margin-top: 4px; font-size: 9px; white-space: nowrap; }
+                    .kinv .upi i { font-weight: 700; color: #666; margin-right: 2px; }
+                    .kinv .upi span { background-color: #3ecf8e; color: #fff; padding: 1px 4px; border-radius: 2px; }
                     .kinv .grid td { border-left: none; border-right: none; }
                     .kinv .no-top > tbody > tr:first-child > td,
                     .kinv .no-top > thead > tr:first-child > th { border-top: none; }
@@ -110,11 +115,7 @@
                         </td>
                         <td colspan="2" class="small">
                             <div class="b" style="margin-bottom: 6px;">Ship To</div>
-                            <div>
-                                <t t-if="shipping != partner"><t t-out="shipping.name"/>, </t>
-                                <t t-out="' '.join(p for p in [shipping.street, shipping.street2, shipping.city] if p)"/>
-                                <t t-if="shipping.zip"> -<t t-out="shipping.zip"/></t>
-                            </div>
+                            <div t-field="o.kadhan_ship_to_address"/>
                         </td>
                     </tr>
                 </table>
@@ -150,7 +151,7 @@
                             <td class="r" t-out="line.price_total" t-options="money"/>
                         </tr>
                         <!-- Blank filler so the table keeps the height of the reference layout -->
-                        <tr t-if="len(lines) &lt; 8">
+                        <tr t-if="len(lines) &lt; 8" class="filler">
                             <td t-att-style="'height: %dpx;' % ((8 - len(lines)) * 26)"/>
                             <td/><td/><td/><td/><td/><td/><td/>
                         </tr>
@@ -176,22 +177,22 @@
                         </td>
                         <td style="width: 50%; padding: 0;">
                             <table class="inner">
-                                <tr><td colspan="2" class="b" style="padding: 4px 6px;">Amounts</td></tr>
-                                <tr class="sep">
-                                    <td style="padding-left: 6px;">Sub Total</td>
-                                    <td class="r" style="padding-right: 6px;" t-out="o.amount_total" t-options="money"/>
+                                <tr><td colspan="2" class="b">Amounts</td></tr>
+                                <tr class="line">
+                                    <td>Sub Total</td>
+                                    <td class="r" t-out="o.amount_total" t-options="money"/>
                                 </tr>
-                                <tr class="sep b">
-                                    <td style="padding-left: 6px;">Total</td>
-                                    <td class="r" style="padding-right: 6px;" t-out="o.amount_total" t-options="money"/>
+                                <tr class="b">
+                                    <td>Total</td>
+                                    <td class="r" t-out="o.amount_total" t-options="money"/>
                                 </tr>
-                                <tr class="sep">
-                                    <td style="padding-left: 6px;">Received</td>
-                                    <td class="r" style="padding-right: 6px;" t-out="o.amount_total - o.amount_residual" t-options="money"/>
+                                <tr class="line">
+                                    <td>Received</td>
+                                    <td class="r" t-out="o.amount_total - o.amount_residual" t-options="money"/>
                                 </tr>
-                                <tr class="sep">
-                                    <td style="padding-left: 6px;">Balance</td>
-                                    <td class="r" style="padding-right: 6px;" t-out="o.amount_residual" t-options="money"/>
+                                <tr>
+                                    <td>Balance</td>
+                                    <td class="r" t-out="o.amount_residual" t-options="money"/>
                                 </tr>
                             </table>
                         </td>
@@ -263,16 +264,15 @@
                             <div class="b" style="margin-bottom: 6px;">Bank Details</div>
                             <table class="nb">
                                 <tr>
-                                    <td t-if="qr_code_url" style="width: 90px; padding-right: 6px;">
-                                        <img t-att-src="qr_code_url" style="width: 84px; height: 84px;"/>
+                                    <td t-if="qr_code_url" style="width: 96px; padding-right: 8px;">
+                                        <img t-att-src="qr_code_url" style="width: 88px; height: 88px;"/>
+                                        <div class="upi"><i>UPI</i><span>SCAN TO PAY</span></div>
                                     </td>
-                                    <td class="small">
-                                        <t t-if="bank">
-                                            <div t-if="bank.bank_id">Name: <t t-out="bank.bank_id.name"/></div>
-                                            <div>Account No.: <t t-out="bank.acc_number"/></div>
-                                            <div t-if="bank.bank_id.bic">IFSC code: <t t-out="bank.bank_id.bic"/></div>
-                                            <div>Account Holder's Name: <t t-out="bank.acc_holder_name or bank.partner_id.name"/></div>
-                                        </t>
+                                    <td class="bank-lines">
+                                        <div t-if="bank.get('name')">Name: <t t-out="bank['name']"/></div>
+                                        <div t-if="bank.get('acc_number')">Account No.: <t t-out="bank['acc_number']"/></div>
+                                        <div t-if="bank.get('ifsc')">IFSC code: <t t-out="bank['ifsc']"/></div>
+                                        <div t-if="bank.get('holder')">Account Holder's Name: <t t-out="bank['holder']"/></div>
                                     </td>
                                 </tr>
                             </table>

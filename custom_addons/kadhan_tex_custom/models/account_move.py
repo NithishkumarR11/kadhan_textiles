@@ -1,4 +1,5 @@
-from odoo import fields, models
+from odoo import api, fields, models
+from odoo.tools.image import image_data_uri
 
 try:
     from num2words import num2words
@@ -11,6 +12,54 @@ class AccountMove(models.Model):
 
     kadhan_eway_bill_no = fields.Char(string="E-way Bill Number", copy=False)
     kadhan_vehicle_no = fields.Char(string="Vehicle Number", copy=False)
+    kadhan_ship_to_address = fields.Text(
+        string="Ship To Address",
+        compute="_compute_kadhan_ship_to_address", store=True, readonly=False, precompute=True,
+        copy=True,
+        help="Printed as Ship To on the invoice. Filled from the Ship To contact; "
+             "edit it to enter any other address.",
+    )
+
+    @api.depends("partner_shipping_id")
+    def _compute_kadhan_ship_to_address(self):
+        for move in self:
+            shipping = move.partner_shipping_id
+            if not shipping:
+                move.kadhan_ship_to_address = False
+                continue
+            address = " ".join(p for p in [shipping.street, shipping.street2, shipping.city] if p)
+            if shipping.zip:
+                address += " -%s" % shipping.zip
+            name = shipping.name if shipping != move.partner_id else ""
+            move.kadhan_ship_to_address = "\n".join(p for p in [name, address] if p) or False
+
+    def _kadhan_bank_details(self):
+        """Bank details for the invoice footer: the company's report bank details,
+        falling back to the invoice's recipient bank account."""
+        self.ensure_one()
+        company = self.company_id
+        if company.kadhan_bank_name or company.kadhan_bank_acc_number:
+            return {
+                "name": company.kadhan_bank_name,
+                "acc_number": company.kadhan_bank_acc_number,
+                "ifsc": company.kadhan_bank_ifsc,
+                "holder": company.kadhan_bank_acc_holder,
+            }
+        bank = self.partner_bank_id
+        if bank:
+            return {
+                "name": bank.bank_id.name,
+                "acc_number": bank.acc_number,
+                "ifsc": bank.bank_id.bic,
+                "holder": bank.acc_holder_name or bank.partner_id.name,
+            }
+        return {}
+
+    def _kadhan_payment_qr_src(self):
+        """The company's uploaded payment QR; no QR is printed without one."""
+        self.ensure_one()
+        qr = self.company_id.kadhan_payment_qr
+        return image_data_uri(qr) if qr else False
 
     def _kadhan_amount_in_words(self):
         """Total in words using the Indian numbering system (lakh / crore)."""

@@ -9,6 +9,18 @@
                 <field name="kadhan_eway_bill_no" invisible="move_type not in ('out_invoice', 'out_refund')"/>
                 <field name="kadhan_vehicle_no" invisible="move_type not in ('out_invoice', 'out_refund')"/>
             </xpath>
+            <!-- Ship To: pick a contact (Odoo's delivery address, also used for place of supply)
+                 or type the address to print -->
+            <xpath expr="//field[@name='partner_shipping_id']" position="attributes">
+                <attribute name="groups"/>
+                <attribute name="string">Ship To</attribute>
+            </xpath>
+            <xpath expr="//field[@name='partner_shipping_id']" position="after">
+                <field name="kadhan_ship_to_address"
+                       invisible="move_type not in ('out_invoice', 'out_refund', 'out_receipt')"
+                       readonly="state != 'draft'"
+                       placeholder="Address printed as Ship To"/>
+            </xpath>
             <!-- Show the line Unit even when the "Units of Measure" setting is off -->
             <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_uom_id'][@groups='uom.group_uom']" position="attributes">
                 <attribute name="groups"/>

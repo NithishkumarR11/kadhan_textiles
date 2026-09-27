@@ -1,0 +1,233 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_delivery_document_kadhan" inherit_id="stock.report_delivery_document" priority="99">
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">web.basic_layout</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]" position="replace">
+            <div class="page">
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="partner" t-value="o.partner_id"/>
+                <t t-set="challan_lines" t-value="o.get_challan_product_summary()"/>
+
+                <style type="text/css">
+                    .kadhan-report {
+                        font-family: Arial, Helvetica, sans-serif;
+                        font-size: 13px;
+                        color: #222;
+                    }
+                    .kadhan-report * {
+                        font-family: inherit;
+                    }
+                    .kadhan-report table {
+                        width: 100%;
+                        border-collapse: collapse;
+                    }
+                    .kadhan-report table,
+                    .kadhan-report tr,
+                    .kadhan-report thead,
+                    .kadhan-report tbody,
+                    .kadhan-report tfoot,
+                    .kadhan-report th,
+                    .kadhan-report td {
+                        border: none !important;
+                        border-width: 0 !important;
+                    }
+                    .kadhan-report .plain td {
+                        padding: 0;
+                        vertical-align: top;
+                    }
+                    .kadhan-report .text-right {
+                        text-align: right;
+                    }
+                    .kadhan-report .text-center {
+                        text-align: center;
+                    }
+                    .kadhan-report .title {
+                        text-align: center;
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: #E8992E;
+                    }
+                    .kadhan-report .subtitle {
+                        text-align: center;
+                        margin-top: 4px;
+                        margin-bottom: 20px;
+                    }
+                    .kadhan-report .company-block {
+                        margin-top: 6px;
+                    }
+                    .kadhan-report .address-line {
+                        margin-top: 4px;
+                    }
+                    .kadhan-report .meta-table {
+                        margin-top: 20px;
+                    }
+                    .kadhan-report .meta-table td {
+                        width: 33.33%;
+                        vertical-align: top;
+                        padding: 0;
+                    }
+                    .kadhan-report .meta-label {
+                        color: #E8992E;
+                        font-weight: 700;
+                        margin-bottom: 4px;
+                    }
+                    .kadhan-report .bill-block {
+                        margin-top: 20px;
+                    }
+                    .kadhan-report .bill-label {
+                        font-weight: 700;
+                        margin-bottom: 4px;
+                    }
+                    .kadhan-report .place-line {
+                        margin-top: 12px;
+                    }
+                    .kadhan-report .items {
+                        margin-top: 20px;
+                    }
+                    .kadhan-report .items thead th {
+                        background-color: #E8992E;
+                        color: #fff;
+                        font-weight: 400;
+                        padding: 8px 10px;
+                        text-align: left;
+                    }
+                    .kadhan-report .items tbody td {
+                        padding: 8px 10px;
+                        border-bottom: 1px solid #eee !important;
+                        vertical-align: top;
+                    }
+                    .kadhan-report .summary-wrap {
+                        width: 32%;
+                        margin-left: auto;
+                        margin-top: 16px;
+                    }
+                    .kadhan-report .summary-table td {
+                        padding: 6px 0;
+                    }
+                    .kadhan-report .summary-table .label {
+                        text-align: left;
+                    }
+                    .kadhan-report .summary-table .value {
+                        text-align: right;
+                        white-space: nowrap;
+                    }
+                    .kadhan-report .summary-table .total-row td {
+                        font-weight: 700;
+                        font-size: 15px;
+                    }
+                    .kadhan-report .notes-block {
+                        margin-top: 40px;
+                    }
+                    .kadhan-report .notes-text {
+                        margin-top: 10px;
+                    }
+                </style>
+
+                <div class="kadhan-report">
+                    <div class="title">DELIVERY CHALLAN</div>
+                    <div class="subtitle">Delivery Challan# - <span t-field="o.name"/></div>
+
+                    <div class="company-block">
+                        <div t-if="company.name">
+                            Company Name: <strong><span t-field="company.name"/></strong>
+                        </div>
+                        <div class="address-line" t-if="company.partner_id.contact_address">
+                            Address: <span t-esc="company.partner_id.contact_address"/>
+                        </div>
+                        <div class="address-line" t-if="company.vat">
+                            GSTIN: <span t-field="company.vat"/>
+                        </div>
+                        <div class="address-line" t-if="company.phone">
+                            Phone: <span t-field="company.phone"/>
+                        </div>
+                    </div>
+
+                    <table class="meta-table plain">
+                        <tr>
+                            <td>
+                                <div class="meta-label">Delivery Challan #</div>
+                                <div><span t-field="o.name"/></div>
+                            </td>
+                            <td>
+                                <div class="meta-label">Order Date #</div>
+                                <div><span t-field="o.scheduled_date" t-options='{"widget": "date"}'/></div>
+                            </td>
+                            <td>
+                                <div class="meta-label">Dispatch Date #</div>
+                                <div><span t-field="o.date_done" t-options='{"widget": "date"}'/></div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="bill-block">
+                        <div class="bill-label">Bill To:</div>
+                        <div><span t-field="partner.name"/></div>
+                        <div class="address-line" t-if="partner.contact_address">
+                            <span t-esc="partner.contact_address"/>
+                        </div>
+                        <div class="address-line" t-if="partner.vat">
+                            GSTIN: <span t-field="partner.vat"/>
+                        </div>
+                        <div class="address-line" t-if="partner.phone">
+                            Phone: <span t-field="partner.phone"/>
+                        </div>
+                        <div class="place-line" t-if="partner.state_id">
+                            Place of Supply:
+                            <span t-field="partner.state_id.name"/>
+                            <t t-if="partner.state_id.l10n_in_tin">
+                                (<span t-field="partner.state_id.l10n_in_tin"/>)
+                            </t>
+                        </div>
+                    </div>
+
+                    <table class="items">
+                        <thead>
+                            <tr>
+                                <th style="width: 8%;">SR No.</th>
+                                <th style="width: 30%;">Product</th>
+                                <th style="width: 16%;">HSN</th>
+                                <th class="text-center" style="width: 12%;">Size</th>
+                                <th class="text-right" style="width: 14%;">Qty</th>
+                                <th class="text-center" style="width: 14%;">UoM</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-set="row_no" t-value="0"/>
+                            <t t-foreach="challan_lines" t-as="line">
+                                <t t-set="row_no" t-value="row_no + 1"/>
+                                <tr>
+                                    <td><span t-esc="row_no"/></td>
+                                    <td><span t-esc="line['product'].display_name"/></td>
+                                    <td><span t-esc="line['hsn']"/></td>
+                                    <td class="text-center"><span t-esc="line['size']"/></td>
+                                    <td class="text-right"><span t-esc="line['qty']"/></td>
+                                    <td class="text-center"><span t-esc="line['uom'].name"/></td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div class="summary-wrap">
+                        <table class="summary-table">
+                            <tr class="total-row">
+                                <td class="label">Total Qty</td>
+                                <td class="value">
+                                    <span t-esc="sum(line['qty'] for line in challan_lines)"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="notes-block" t-if="company.delivery_terms">
+                        <div class="bill-label">Terms</div>
+                        <div class="notes-text">
+                            <span t-esc="company.delivery_terms"/>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

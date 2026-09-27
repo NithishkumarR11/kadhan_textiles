@@ -1,0 +1,345 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_invoice_document_kadhan" inherit_id="l10n_in.l10n_in_report_invoice_document_inherit">
+        <xpath expr="//t[@t-call='web.external_layout']" position="attributes">
+            <attribute name="t-call">web.basic_layout</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]" position="replace">
+            <div class="page">
+                <t t-set="company" t-value="o.company_id"/>
+                <t t-set="partner" t-value="o.partner_id"/>
+                <t t-set="company_partner" t-value="company.partner_id"/>
+                <t t-set="lines"
+                   t-value="o.invoice_line_ids.filtered(lambda l: l.display_type == 'product').sorted('sequence')"/>
+
+                <style type="text/css">
+                    .kadhan-report {
+                    font-family: Arial, Helvetica, sans-serif;
+                    font-size: 14px;
+                    color: #222;
+                    }
+                    .kadhan-report * {
+                    font-family: inherit;
+                    }
+                    .kadhan-report table {
+                    width: 100%;
+                    border-collapse: collapse;
+                    }
+                    .kadhan-report table,
+                    .kadhan-report tr,
+                    .kadhan-report thead,
+                    .kadhan-report tbody,
+                    .kadhan-report tfoot,
+                    .kadhan-report th,
+                    .kadhan-report td {
+                    border: none !important;
+                    border-width: 0 !important;
+                    }
+                    .kadhan-report .top-block td,
+                    .kadhan-report .meta-block td,
+                    .kadhan-report .summary-table td,
+                    .kadhan-report .plain td {
+                    padding: 0;
+                    vertical-align: top;
+                    }
+                    .kadhan-report .top-block {
+                    margin-top: 6px;
+                    }
+                    .kadhan-report .text-right {
+                    text-align: right;
+                    }
+                    .kadhan-report .muted {
+                    color: #666;
+                    }
+                    .kadhan-report .company-name,
+                    .kadhan-report .invoice-no,
+                    .kadhan-report .total-amount {
+                    font-weight: 700;
+                    }
+                    .kadhan-report .company-name,
+                    .kadhan-report .invoice-no {
+                    font-size: 15px;
+                    }
+                    .kadhan-report .address-line,
+                    .kadhan-report .meta-line,
+                    .kadhan-report .bill-line,
+                    .kadhan-report .place-line {
+                    margin-top: 4px;
+                    }
+                    .kadhan-report .bill-label,
+                    .kadhan-report .section-title {
+                    margin-top: 14px;
+                    font-size: 15px;
+                    }
+                    .kadhan-report .items {
+                    margin-top: 26px;
+                    }
+                    .kadhan-report .items thead th {
+                    font-weight: 400;
+                    color: #fff;
+                    background-color: #000;
+                    padding: 8px 10px 10px 10px;
+                    text-align: left;
+                    border-bottom: 1px solid #ccc !important;
+                    }
+                    .kadhan-report .items tbody td {
+                    padding: 16px 10px 12px 10px;
+                    border-bottom: 1px solid #ccc !important;
+                    vertical-align: top;
+                    }
+                    .kadhan-report .items .num,
+                    .kadhan-report .items .qty,
+                    .kadhan-report .items .money,
+                    .kadhan-report .items .center {
+                    text-align: center;
+                    }
+                    .kadhan-report .items .money-right {
+                    text-align: right;
+                    }
+                    .kadhan-report .items .tax-rate {
+                    display: block;
+                    color: #666;
+                    margin-top: 6px;
+                    }
+                    .kadhan-report .summary-wrap {
+                    width: 32%;
+                    margin-left: auto;
+                    margin-top: 18px;
+                    }
+                    .kadhan-report .summary-table td {
+                    padding: 14px 0;
+                    }
+                    .kadhan-report .summary-table .label {
+                    text-align: right;
+                    padding-right: 24px;
+                    }
+                    .kadhan-report .summary-table .value {
+                    text-align: right;
+                    white-space: nowrap;
+                    }
+                    .kadhan-report .summary-table .total-row td {
+                    font-weight: 700;
+                    font-size: 16px;
+                    }
+                    .kadhan-report .notes-block,
+                    .kadhan-report .terms-block {
+                    margin-top: 56px;
+                    }
+                    .kadhan-report .notes-text,
+                    .kadhan-report .terms-text {
+                    margin-top: 10px;
+                    }
+                </style>
+
+                <div class="kadhan-report">
+                    <!-- Keep this anchor so Odoo's preview inherit can replace it. -->
+                    <div id="qrcode" style="display: none;"/>
+                    <!-- Keep this anchor so Odoo's preview inherit can replace it. -->
+                    <p name="payment_communication" style="display: none;">
+                        <t t-if="o.partner_bank_id"/>
+                    </p>
+                    <table class="top-block plain">
+                        <tr>
+                            <td style="width: 68%;">
+                                <div class="company-name">
+                                    <span t-field="company.name"/>
+                                </div>
+                                <div t-if="company.report_contact_name">
+                                    <span t-field="company.report_contact_name"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.street">
+                                    <span t-field="company_partner.street"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.street2">
+                                    <span t-field="company_partner.street2"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.city">
+                                    <span t-field="company_partner.city"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.state_id">
+                                    <span t-field="company_partner.state_id.name"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.country_id">
+                                    <span t-field="company_partner.country_id.name"/>
+                                </div>
+                                <div class="address-line" t-if="company_partner.vat">
+                                    GSTIN
+                                    <span t-field="company_partner.vat"/>
+                                </div>
+                            </td>
+                            <td class="text-right" style="width: 32%;">
+                                <div class="invoice-no">Invoice#
+                                    <span t-field="o.name"/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <table>
+                        <tr>
+                            <td style="width: 62%;">
+                                <div class="bill-label">Bill To:
+                                    <span t-field="partner.name"/>
+                                </div>
+                                <div class="bill-line">
+                                    <span t-field="partner.name"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.street">
+                                    <span t-field="partner.street"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.street2">
+                                    <span t-field="partner.street2"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.city">
+                                    <span t-field="partner.city"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.state_id">
+                                    <span t-field="partner.state_id.name"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.country_id">
+                                    <span t-field="partner.country_id.name"/>
+                                </div>
+                                <div class="bill-line" t-if="partner.vat">
+                                    GSTIN
+                                    <span t-field="partner.vat"/>
+                                </div>
+                            </td>
+                            <td class="text-right" style="width: 38%; padding-top: 72px;">
+                                <div class="meta-line">
+                                    Invoice Date :
+                                    <span t-if="o.invoice_date" t-field="o.invoice_date"
+                                          t-options='{"widget": "date"}'/>
+                                </div>
+                                <div>
+                                    Due Date :
+                                    <span t-if="o.invoice_date_due" t-field="o.invoice_date_due"
+                                          t-options='{"widget": "date"}'/>
+                                </div>
+                            </td>
+                        </tr>
+                    </table>
+
+                    <div class="place-line" t-if="o.partner_shipping_id.state_id or partner.state_id">
+                        Place of Supply:
+                        <span t-if="o.partner_shipping_id.state_id" t-field="o.partner_shipping_id.state_id.name"/>
+                        <span t-elif="partner.state_id" t-field="partner.state_id.name"/>
+                    </div>
+
+                    <table class="items">
+                        <thead>
+                            <tr>
+                                <th style="width: 5%;">#</th>
+                                <th style="width: 29%;">Item Description</th>
+                                <th style="width: 13%;">HSN/SAC</th>
+                                <th style="width: 8%;">Qty</th>
+                                <th style="width: 10%;">Rate</th>
+                                <th style="width: 10%;">SGST</th>
+                                <th style="width: 10%;">CGST</th>
+                                <th style="width: 7%;">Cess</th>
+                                <th style="width: 12%;">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <t t-foreach="lines" t-as="line">
+                                <t t-set="all_taxes"
+                                   t-value="line.tax_ids.filtered(lambda t: t.amount_type != 'group') | line.tax_ids.filtered(lambda t: t.amount_type == 'group').mapped('children_tax_ids')"/>
+                                <t t-set="sgst_tax"
+                                   t-value="sum(all_taxes.filtered(lambda t: 'SGST' in t.name.upper()).mapped('amount'))"/>
+                                <t t-set="cgst_tax"
+                                   t-value="sum(all_taxes.filtered(lambda t: 'CGST' in t.name.upper()).mapped('amount'))"/>
+                                <t t-set="cess_tax"
+                                   t-value="sum(all_taxes.filtered(lambda t: 'CESS' in t.name.upper()).mapped('amount'))"/>
+                                <t t-set="base_amount" t-value="line.price_subtotal or 0.0"/>
+                                <tr>
+                                    <td class="num">
+                                        <span t-out="line_index + 1"/>
+                                    </td>
+                                    <td>
+                                        <span t-field="line.name"/>
+                                    </td>
+                                    <td class="center">
+                                        <span t-esc="line.product_id.product_tmpl_id.kadhan_hsn_code or ''"/>
+                                    </td>
+                                    <td class="qty">
+                                        <span t-field="line.quantity"/>
+                                    </td>
+                                    <td class="money">
+                                        <span t-field="line.price_unit"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    <td class="money">
+                                        <span t-out="base_amount * sgst_tax / 100.0"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        <span class="tax-rate" t-out="sgst_tax"/>
+                                    </td>
+                                    <td class="money">
+                                        <span t-out="base_amount * cgst_tax / 100.0"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        <span class="tax-rate" t-out="cgst_tax"/>
+                                    </td>
+                                    <td class="money">
+                                        <span t-out="base_amount * cess_tax / 100.0"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        <span class="tax-rate" t-out="cess_tax"/>
+                                    </td>
+                                    <td class="money-right">
+                                        <span t-field="line.price_subtotal"
+                                              t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                </tr>
+                            </t>
+                        </tbody>
+                    </table>
+
+                    <div class="summary-wrap">
+                        <table class="summary-table">
+                            <tr>
+                                <td class="label">Sub Total</td>
+                                <td class="value">
+                                    <span t-field="o.amount_untaxed"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                            <t t-if="o.tax_totals">
+                                <t t-foreach="o.tax_totals.get('subtotals', [])" t-as="subtotal">
+                                    <t t-foreach="subtotal.get('tax_groups', [])" t-as="tax_group">
+                                        <tr>
+                                            <td class="label">
+                                                <span t-out="tax_group['group_name']"/>
+                                            </td>
+                                            <td class="value">
+                                                <span t-out="tax_group['tax_amount_currency']"
+                                                      t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                            </td>
+                                        </tr>
+                                    </t>
+                                </t>
+                            </t>
+                            <tr class="total-row">
+                                <td class="label">TOTAL</td>
+                                <td class="value">
+                                    <span class="total-amount" t-field="o.amount_total"
+                                          t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+
+                    <div class="notes-block">
+                        <div class="section-title">Notes</div>
+                        <div class="notes-text">
+                            <span t-esc="company.report_footer_note or o.narration or ''"/>
+                        </div>
+
+                        <div t-if="company.invoice_terms">
+                            <div class="section-title">Terms &amp; Conditions</div>
+                            <div class="terms-text">
+                                <span t-field="company.invoice_terms"/>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+</odoo>

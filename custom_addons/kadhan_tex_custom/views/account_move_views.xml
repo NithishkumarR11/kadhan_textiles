@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_kadhan_tex_custom" model="ir.ui.view">
+        <field name="name">account.move.form.kadhan.tex.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//group[@name='sale_info_group']" position="inside">
+                <field name="kadhan_eway_bill_no" invisible="move_type not in ('out_invoice', 'out_refund')"/>
+                <field name="kadhan_vehicle_no" invisible="move_type not in ('out_invoice', 'out_refund')"/>
+            </xpath>
+            <!-- Show the line Unit even when the "Units of Measure" setting is off -->
+            <xpath expr="//field[@name='invoice_line_ids']/list/field[@name='product_uom_id'][@groups='uom.group_uom']" position="attributes">
+                <attribute name="groups"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/kanban//field[@name='product_uom_id']" position="attributes">
+                <attribute name="groups"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']/form//field[@name='product_uom_id']" position="attributes">
+                <attribute name="groups"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

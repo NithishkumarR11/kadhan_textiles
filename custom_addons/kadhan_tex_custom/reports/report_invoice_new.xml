@@ -70,9 +70,8 @@
                                 <t t-out="', '.join(p for p in [company_partner.street, company_partner.street2, company_partner.city] if p)"/>
                                 <t t-if="company_partner.zip"> - <t t-out="company_partner.zip"/></t>
                             </div>
-                            <div t-if="company.email">Email: <t t-out="company.email"/></div>
-                            <div t-if="company.phone">Phone: <t t-out="company.phone"/></div>
                             <div t-if="company.vat">GSTIN: <t t-out="company.vat"/></div>
+                            <div t-if="company.phone">Phone: <t t-out="company.phone"/></div>
                             <div t-if="company.state_id">State: <t t-out="o._kadhan_state_label(company.state_id)"/></div>
                         </td>
                         <td style="width: 25%;">

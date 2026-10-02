@@ -13,3 +13,4 @@ class ResCompany(models.Model):
     kadhan_bank_ifsc = fields.Char(string="IFSC Code")
     kadhan_bank_acc_holder = fields.Char(string="Account Holder's Name")
     kadhan_payment_qr = fields.Image(string="Payment QR Code", max_width=512, max_height=512)
+    kadhan_invoice_logo = fields.Image(string="Invoice Logo", max_width=512, max_height=512)

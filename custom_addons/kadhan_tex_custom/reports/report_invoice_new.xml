@@ -37,7 +37,9 @@
                     .kinv h2 { text-align: center; font-size: 17px; font-weight: 700; margin: 0 0 6px 0; }
                     .kinv table { width: 100%; border-collapse: collapse; }
                     .kinv td, .kinv th { border: 1px solid #808080; padding: 4px 6px; vertical-align: top; }
-                    .kinv .nb td { border: none; padding: 0; }
+                    /* borderless inner tables; !important beats Odoo's report table styles */
+                    .kinv table.nb, .kinv table.nb * { border: 0 none !important; }
+                    .kinv .nb td { padding: 0; }
                     .kinv .b { font-weight: 700; }
                     .kinv .r { text-align: right; white-space: nowrap; }
                     .kinv .c { text-align: center; }
@@ -65,14 +67,23 @@
                 <table>
                     <tr>
                         <td style="width: 50%;" rowspan="3" class="small">
-                            <div class="company-name" t-out="company.name"/>
-                            <div>
-                                <t t-out="', '.join(p for p in [company_partner.street, company_partner.street2, company_partner.city] if p)"/>
-                                <t t-if="company_partner.zip"> - <t t-out="company_partner.zip"/></t>
-                            </div>
-                            <div t-if="company.vat">GSTIN: <t t-out="company.vat"/></div>
-                            <div t-if="company.phone">Phone: <t t-out="company.phone"/></div>
-                            <div t-if="company.state_id">State: <t t-out="o._kadhan_state_label(company.state_id)"/></div>
+                            <table class="nb">
+                                <tr>
+                                    <td t-if="company.kadhan_invoice_logo" style="width: 100px; padding-right: 10px; vertical-align: middle;">
+                                        <img t-att-src="image_data_uri(company.kadhan_invoice_logo)" style="width: 96px; height: 96px; object-fit: contain;"/>
+                                    </td>
+                                    <td>
+                                        <div class="company-name" t-out="company.name"/>
+                                        <div>
+                                            <t t-out="', '.join(p for p in [company_partner.street, company_partner.street2, company_partner.city] if p)"/>
+                                            <t t-if="company_partner.zip"> - <t t-out="company_partner.zip"/></t>
+                                        </div>
+                                        <div t-if="company.vat">GSTIN: <t t-out="company.vat"/></div>
+                                        <div t-if="company.phone">Phone: <t t-out="company.phone"/></div>
+                                        <div t-if="company.state_id">State: <t t-out="o._kadhan_state_label(company.state_id)"/></div>
+                                    </td>
+                                </tr>
+                            </table>
                         </td>
                         <td style="width: 25%;">
                             <div>Invoice No.</div>

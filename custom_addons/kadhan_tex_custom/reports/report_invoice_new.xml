@@ -34,6 +34,8 @@
                 <style type="text/css">
                     .kinv { font-family: "Times New Roman", "Liberation Serif", Times, serif !important; font-size: 13px; color: #000; }
                     .kinv * { font-family: "Times New Roman", "Liberation Serif", Times, serif !important; }
+                    /* wkhtmltopdf on Windows rounds letter positions and overlaps wide letters (m, w) */
+                    .kinv, .kinv * { text-rendering: geometricPrecision; }
                     .kinv h2 { text-align: center; font-size: 17px; font-weight: 700; margin: 0 0 6px 0; }
                     .kinv table { width: 100%; border-collapse: collapse; }
                     .kinv td, .kinv th { border: 1px solid #808080; padding: 4px 6px; vertical-align: top; }
